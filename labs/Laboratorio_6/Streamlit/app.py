@@ -3,6 +3,8 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import cv2
+import os
+import requests
 
 # Configuración de la página
 st.set_page_config(
@@ -14,13 +16,29 @@ st.set_page_config(
 # Cache del modelo para evitar recargarlo en cada interacción
 @st.cache_resource
 def load_model():
-    """Cargar el modelo entrenado"""
-    try:
-        model = tf.keras.models.load_model('my_cat_dog_model.keras')
-        return model
-    except Exception as e:
-        st.error(f"Error cargando el modelo: {e}")
-        return None
+    # URL de descarga directa de tu modelo en Hugging Face Hub
+    model_url = "https://huggingface.co/nicolastibata/my_cat_dog_model/resolve/main/my_cat_dog_model.keras"
+    model_path = "my_cat_dog_model.keras"
+
+    # Descargar el modelo solo si no existe
+    if not os.path.exists(model_path):
+        with st.spinner("Descargando el modelo... esto puede tomar un momento."):
+            response = requests.get(model_url)
+            with open(model_path, "wb") as f:
+                f.write(response.content)
+
+    return tf.keras.models.load_model(model_path)
+
+
+model = load_model()
+# def load_model():
+#     """Cargar el modelo entrenado"""
+#     try:
+#         model = tf.keras.models.load_model('my_cat_dog_model.keras')
+#         return model
+#     except Exception as e:
+#         st.error(f"Error cargando el modelo: {e}")
+#         return None
 
 def preprocess_image(_image, target_size=(128, 128)):
     """Preprocesar imagen para el modelo"""
