@@ -3,8 +3,10 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import cv2
+import gdown
 import os
 import requests
+from io import BytesIO
 
 # Configuración de la página
 st.set_page_config(
@@ -28,7 +30,6 @@ def load_model():
                 f.write(response.content)
 
     return tf.keras.models.load_model(model_path)
-
 
 model = load_model()
 # def load_model():
@@ -73,6 +74,17 @@ def predict_image(model, image):
     confidence = prediction[0][predicted_class]
     
     return class_names[predicted_class], confidence, prediction[0]
+
+@st.cache_data
+def load_sample_image(image_url):
+    """Descarga y cachea una imagen de ejemplo desde una URL."""
+    try:
+        response = requests.get(image_url)
+        response.raise_for_status()  # Lanza un error si la descarga falla
+        return Image.open(BytesIO(response.content))
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error descargando imagen de ejemplo: {e}")
+        return None
 
 # Interfaz principal
 def main():
@@ -132,37 +144,43 @@ def main():
     
     col1, col2, col3 = st.columns(3)
     
-    # Usamos las imágenes locales del proyecto
-    sample_images = {
-        "Gato": "cat.jpg",
-        "Perro": "dog1.png",
-        "Otro Perro": "dog2.png"
+    # --- MODIFICADO ---
+    # Reemplaza esta URL base con la de tu repositorio de GitHub
+    base_image_url = "https://raw.githubusercontent.com/nicolastibata/MINE_4210_ADL_202520/main/labs/Laboratorio_6/Streamlit/"
+    
+    sample_images_url = {
+        "Gato": base_image_url + "cat.jpg",
+        "Perro": base_image_url + "dog1.png",
+        "Otro Perro": base_image_url + "dog2.png"
     }
 
-    def set_sample_image(path):
-        st.session_state.image_to_predict = Image.open(path)
-        # Al seleccionar un ejemplo, reseteamos el estado del archivo subido
-        # para que no vuelva a tomarse en el siguiente refresco.
-        if uploaded_file:
-            st.session_state.last_uploaded_file_id = uploaded_file.file_id
-        else:
+    def set_sample_image_from_url(url):
+        image = load_sample_image(url)
+        if image:
+            st.session_state.image_to_predict = image
+            # Resetea el estado del archivo subido
             st.session_state.last_uploaded_file_id = None
 
-    # Lógica para cargar imágenes locales
     with col1:
-        st.image(sample_images["Gato"], caption="Gato de ejemplo", use_container_width=True)
-        if st.button("Usar Gato"):
-            set_sample_image(sample_images["Gato"])
+        cat_image = load_sample_image(sample_images_url["Gato"])
+        if cat_image:
+            st.image(cat_image, caption="Gato de ejemplo", use_container_width=True)
+            if st.button("Usar Gato"):
+                set_sample_image_from_url(sample_images_url["Gato"])
 
     with col2:
-        st.image(sample_images["Perro"], caption="Perro de ejemplo", use_container_width=True)
-        if st.button("Usar Perro"):
-            set_sample_image(sample_images["Perro"])
+        dog_image = load_sample_image(sample_images_url["Perro"])
+        if dog_image:
+            st.image(dog_image, caption="Perro de ejemplo", use_container_width=True)
+            if st.button("Usar Perro"):
+                set_sample_image_from_url(sample_images_url["Perro"])
 
     with col3:
-        st.image(sample_images["Otro Perro"], caption="Otro Perro de ejemplo", use_container_width=True)
-        if st.button("Usar Otro Perro"):
-            set_sample_image(sample_images["Otro Perro"])
+        another_dog_image = load_sample_image(sample_images_url["Otro Perro"])
+        if another_dog_image:
+            st.image(another_dog_image, caption="Otro Perro de ejemplo", use_container_width=True)
+            if st.button("Usar Otro Perro"):
+                set_sample_image_from_url(sample_images_url["Otro Perro"])
 
     # Usar la imagen del estado de la sesión
     image_to_predict = st.session_state.image_to_predict
