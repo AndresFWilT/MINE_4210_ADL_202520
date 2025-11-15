@@ -20,8 +20,7 @@ A repo for "Análisis de Deep Learning" at Universidad de los Andes. You'll find
 | 7   | [Lab 7 - T3: RNN Neural Networks + Word Embeddings](labs/Laboratorio_7/) | 2 hours |
 | 8   | [Lab 8: Autoencoder + Anomaly Detection](labs/Laboratorio_8/) | 2 hours |
 | 9   | [Lab 9 - T4: BERT + Text Generation](labs/Laboratorio_9/) | 2 hours |
-| 10   | [Lab 10: VAE](labs/Laboratorio_10/) | 2 hours |
-| 11   | [Lab 11 - Bonus: GAN](labs/Laboratorio_11/) | 2 hours |
+| 10   | [Lab 10 - Bonus: VAE + GAN ](labs/Laboratorio_10/) | 2 hours |
 
 ## Prerequisites
 
